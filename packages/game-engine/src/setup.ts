@@ -94,7 +94,7 @@ export function createInitialState(
 
   return {
     hand: { [player1]: player1Hand, [player2]: player2Hand },
-    camelHerd: { [player1]: 0, [player2]: 0 },
+    camelHerd: { [player1]: [], [player2]: [] },
     market,
     deck: remaining,
     discardPile: [],

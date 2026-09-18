@@ -2,7 +2,7 @@ import { Card, GoodsType, PlayerId, SaleSize } from "shared";
 
 export type GameState = {
   hand: Record<PlayerId, Card[]>;
-  camelHerd: Record<PlayerId, number>;
+  camelHerd: Record<PlayerId, Card[]>;
   market: Card[];
   deck: Card[];
   discardPile: Card[];
