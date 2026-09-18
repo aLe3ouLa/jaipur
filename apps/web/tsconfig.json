@@ -10,5 +10,8 @@
     "types": ["vite/client"]
   },
   "include": ["src"],
-  "references": [{ "path": "../../packages/shared" }]
+  "references": [
+    { "path": "../../packages/shared" },
+    { "path": "../../packages/game-engine" }
+  ]
 }

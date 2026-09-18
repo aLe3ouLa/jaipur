@@ -5,6 +5,20 @@ export function createHttpApp(): Express {
   const app = express();
   app.use(express.json());
 
+  // Dev-friendly CORS: the web client runs on a different origin/port
+  // (Vite's dev server) than this API. Fine for local development; revisit
+  // with an allowlist before any real deployment.
+  app.use((_req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+    if (_req.method === "OPTIONS") {
+      res.sendStatus(204);
+      return;
+    }
+    next();
+  });
+
   app.post("/api/games", (_req, res) => {
     const { serverGame, token } = createGame();
     res.status(201).json({ code: serverGame.code, token });

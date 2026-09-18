@@ -13,7 +13,7 @@ export type PlayerView = {
   bonusTokens: Record<SaleSize, number[]>;
   myScore: number;
   opponentScore: number;
-  turn: PlayerId;
+  isYourTurn: boolean;
   roundNumber: number;
   gameStatus:
     | "waiting_for_players"
@@ -64,7 +64,7 @@ export function createPlayerView(
     bonusTokens: state.bonusTokens,
     myScore,
     opponentScore,
-    turn: state.turn,
+    isYourTurn: state.turn === playerId,
     roundNumber: state.roundNumber,
     gameStatus: state.gameStatus,
     mySeals,
