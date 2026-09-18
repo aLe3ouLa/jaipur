@@ -144,7 +144,7 @@ export function validateCommand(
         };
       }
 
-      if (state.goodsTokens[command.goodsType] <= 0) {
+      if (state.goodsTokens[command.goodsType].length <= 0) {
         return {
           legal: false,
           reason: "There are not enough tokens",

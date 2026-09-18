@@ -63,15 +63,6 @@ function takeCamels(
   return { camels, remainingDeck };
 }
 
-const getTokenCounts = <T extends string | number>(
-  tokenValues: Record<T, number[]>,
-): Record<T, number> =>
-  Object.fromEntries(
-    (Object.entries(tokenValues) as [string, number[]][]).map(
-      ([type, values]) => [type, values.length],
-    ),
-  ) as Record<T, number>;
-
 export function createInitialState(
   players: [PlayerId, PlayerId],
   random: RandomSource,
@@ -98,8 +89,12 @@ export function createInitialState(
     market,
     deck: remaining,
     discardPile: [],
-    goodsTokens: getTokenCounts(GOODS_TOKEN_VALUES),
-    bonusTokens: getTokenCounts(BONUS_TOKEN_VALUES),
+    goodsTokens: structuredClone(GOODS_TOKEN_VALUES),
+    bonusTokens: {
+      3: shuffle(BONUS_TOKEN_VALUES[3], random),
+      4: shuffle(BONUS_TOKEN_VALUES[4], random),
+      5: shuffle(BONUS_TOKEN_VALUES[5], random),
+    },
     score: { [player1]: 0, [player2]: 0 },
     turn: player1,
     roundNumber: 1,

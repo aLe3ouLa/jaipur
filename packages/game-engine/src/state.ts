@@ -6,8 +6,8 @@ export type GameState = {
   market: Card[];
   deck: Card[];
   discardPile: Card[];
-  goodsTokens: Record<GoodsType, number>;
-  bonusTokens: Record<SaleSize, number>;
+  goodsTokens: Record<GoodsType, number[]>;
+  bonusTokens: Record<SaleSize, number[]>;
   score: Record<PlayerId, number>;
   turn: PlayerId;
   roundNumber: number;
