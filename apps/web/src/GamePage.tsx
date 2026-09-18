@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Card as CardModel, GoodsType } from "shared";
 import { useGameConnection } from "./useGameConnection.js";
-import { Card, CardBack } from "./Card.js";
+import { Card, CardBack, CardPile } from "./Card.js";
 
 type Mode = "none" | "exchange" | "sell";
 
@@ -147,21 +147,16 @@ export function GamePage({ code, token }: { code: string; token: string }) {
               }
             />
           ))}
-        </div>
-
-        <h4>Your Camels ({view.myCamelHerd.length})</h4>
-        <div className="row">
-          {view.myCamelHerd.map((card) => (
-            <Card
-              key={card.id}
-              card={card}
-              selected={giveSelection.some((c) => c.id === card.id)}
-              disabled={mode !== "exchange"}
-              onClick={
-                mode === "exchange" ? () => toggleGive(card) : undefined
-              }
-            />
-          ))}
+          {mode === "exchange"
+            ? view.myCamelHerd.map((card) => (
+                <Card
+                  key={card.id}
+                  card={card}
+                  selected={giveSelection.some((c) => c.id === card.id)}
+                  onClick={() => toggleGive(card)}
+                />
+              ))
+            : <CardPile count={view.myCamelHerd.length} />}
         </div>
       </section>
 
