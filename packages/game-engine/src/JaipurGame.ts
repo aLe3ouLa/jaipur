@@ -7,10 +7,10 @@ import { applyTakeGoods } from "./reducers/takeGoods";
 import { applyTakeCamels } from "./reducers/takeCamels";
 import { applyExchange } from "./reducers/exchange";
 import { applySellGoods } from "./reducers/sellsGood";
-import { finishRound, otherPlayer } from "./rounds";
+import { finishRound, otherPlayer, RoundSummary } from "./rounds";
 
 export type GameResult =
-  | { success: true; state: GameState }
+  | { success: true; state: GameState; roundSummary?: RoundSummary }
   | { success: false; reason: string };
 
 export class JaipurGame {
@@ -64,11 +64,15 @@ export class JaipurGame {
         break;
     }
 
+    let roundSummary: RoundSummary | undefined;
+
     if (newState.gameStatus === "round_ended") {
       // finishRound deals the next round (or ends the game) and decides
       // whose turn it is next - a reducer never advances turn itself, so
       // this is the one place that responsibility belongs when a round ends.
-      newState = finishRound(newState, this.players, this.random);
+      const result = finishRound(newState, this.players, this.random);
+      newState = result.state;
+      roundSummary = result.summary;
     } else {
       // A successful command always ends the acting player's turn, unless
       // the round just ended above (handled separately by finishRound).
@@ -76,6 +80,6 @@ export class JaipurGame {
     }
 
     this.state = newState;
-    return { success: true, state: newState };
+    return { success: true, state: newState, roundSummary };
   }
 }

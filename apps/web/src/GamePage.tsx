@@ -1,15 +1,21 @@
 import { useMemo, useState } from "react";
 import type { Card as CardModel, GoodsType } from "shared";
 import { useGameConnection } from "./useGameConnection.js";
-import { Card, CardBack, CardPile } from "./Card.js";
+import { Scene } from "./Scene.js";
 
 type Mode = "none" | "exchange" | "sell";
 
 export function GamePage({ code, token }: { code: string; token: string }) {
-  const { view, status, messages, lastError, sendCommand } = useGameConnection(
-    code,
-    token,
-  );
+  const {
+    view,
+    status,
+    messages,
+    lastError,
+    roundEndInfo,
+    gameEndInfo,
+    dismissRoundEnd,
+    sendCommand,
+  } = useGameConnection(code, token);
   const [mode, setMode] = useState<Mode>("none");
   const [giveSelection, setGiveSelection] = useState<CardModel[]>([]);
   const [takeSelection, setTakeSelection] = useState<CardModel[]>([]);
@@ -68,6 +74,41 @@ export function GamePage({ code, token }: { code: string; token: string }) {
 
   return (
     <div className="game">
+      {roundEndInfo && !gameEndInfo && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h2>
+              Round {roundEndInfo.roundNumber} ended
+              {roundEndInfo.youWon === undefined
+                ? " in a tie"
+                : roundEndInfo.youWon
+                  ? " — you won!"
+                  : " — opponent won"}
+            </h2>
+            <p>
+              You: {roundEndInfo.yourRoundScore} rupees &middot; Opponent:{" "}
+              {roundEndInfo.opponentRoundScore} rupees
+            </p>
+            <button type="button" onClick={dismissRoundEnd}>
+              Continue to next round
+            </button>
+          </div>
+        </div>
+      )}
+
+      {gameEndInfo && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h2>{gameEndInfo.youWon ? "You won the game!" : "Game over"}</h2>
+            <p>
+              Final seals — You: {gameEndInfo.yourSeals} &middot; Opponent:{" "}
+              {gameEndInfo.opponentSeals}
+            </p>
+            <a href="/">Back to home</a>
+          </div>
+        </div>
+      )}
+
       <header className="game__header">
         <div>
           Game <strong>{code}</strong> &middot; Round {view.roundNumber}
@@ -97,68 +138,35 @@ export function GamePage({ code, token }: { code: string; token: string }) {
         <div className="banner banner--info">{messages[messages.length - 1]}</div>
       )}
 
-      <section className="opponent-area">
-        <h3>Opponent</h3>
-        <div className="row">
-          <CardBack count={view.opponentHandCount} />
-          <span className="label">hand</span>
-          <CardBack count={view.opponentCamelHerdCount} />
-          <span className="label">camels</span>
-        </div>
-      </section>
-
-      <section className="market-area">
-        <h3>Market</h3>
-        <div className="row">
-          {view.market.map((card) => (
-            <Card
-              key={card.id}
-              card={card}
-              selected={
-                mode === "exchange" &&
-                takeSelection.some((c) => c.id === card.id)
+      <div className="scene-container">
+        <Scene
+          view={view}
+          mode={mode}
+          giveSelection={giveSelection}
+          takeSelection={takeSelection}
+          onMarketClick={(card) => {
+            if (mode === "exchange") {
+              toggleTake(card);
+            } else if (mode === "none" && isMyTurn) {
+              if (card.type === "camel") {
+                sendCommand({ type: "TAKE_CAMELS" });
+              } else {
+                sendCommand({ type: "TAKE_GOODS", cardId: card.id });
               }
-              disabled={mode === "none" ? !isMyTurn : mode === "sell"}
-              onClick={
-                mode === "exchange"
-                  ? () => toggleTake(card)
-                  : mode === "none" && isMyTurn
-                    ? card.type === "camel"
-                      ? () => sendCommand({ type: "TAKE_CAMELS" })
-                      : () => sendCommand({ type: "TAKE_GOODS", cardId: card.id })
-                    : undefined
-              }
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="hand-area">
-        <h3>Your Hand</h3>
-        <div className="row">
-          {view.myHand.map((card) => (
-            <Card
-              key={card.id}
-              card={card}
-              selected={giveSelection.some((c) => c.id === card.id)}
-              disabled={mode === "none"}
-              onClick={
-                mode !== "none" ? () => toggleGive(card) : undefined
-              }
-            />
-          ))}
-          {mode === "exchange"
-            ? view.myCamelHerd.map((card) => (
-                <Card
-                  key={card.id}
-                  card={card}
-                  selected={giveSelection.some((c) => c.id === card.id)}
-                  onClick={() => toggleGive(card)}
-                />
-              ))
-            : <CardPile count={view.myCamelHerd.length} />}
-        </div>
-      </section>
+            }
+          }}
+          onHandClick={(card) => {
+            if (mode !== "none") {
+              toggleGive(card);
+            }
+          }}
+          onCamelClick={(card) => {
+            if (mode === "exchange") {
+              toggleGive(card);
+            }
+          }}
+        />
+      </div>
 
       <section className="actions">
         {mode === "none" && isMyTurn && (

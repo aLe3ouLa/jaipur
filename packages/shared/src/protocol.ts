@@ -24,8 +24,20 @@ export type ServerMessage =
   | { type: "GAME_STARTED" }
   | { type: "PLAYER_DISCONNECTED" }
   | { type: "PLAYER_RECONNECTED" }
-  | { type: "ROUND_ENDED" }
-  | { type: "GAME_ENDED" }
+  | {
+      type: "ROUND_ENDED";
+      roundNumber: number;
+      // undefined only in the practically-impossible full-tie case.
+      youWon: boolean | undefined;
+      yourRoundScore: number;
+      opponentRoundScore: number;
+    }
+  | {
+      type: "GAME_ENDED";
+      youWon: boolean;
+      yourSeals: number;
+      opponentSeals: number;
+    }
   | { type: "ERROR"; reason: string };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

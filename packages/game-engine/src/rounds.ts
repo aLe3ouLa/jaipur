@@ -63,17 +63,28 @@ export function getRoundWinner(
   return undefined;
 }
 
+export type RoundSummary = {
+  roundNumber: number;
+  winner: PlayerId | undefined;
+  scores: Record<PlayerId, number>;
+  seals: Record<PlayerId, number>;
+};
+
 /**
  * Applies round-end scoring to a state whose gameStatus is "round_ended":
  * awards a seal to the round winner, and either ends the game (someone has
  * 2 seals) or deals a fresh round, with the previous round's loser going
- * first, per the official rule.
+ * first, per the official rule. Also returns a summary of the round that
+ * just ended, since the returned state itself either resets scores (fresh
+ * round) or is otherwise not self-explanatory about who won and by how
+ * much - callers (the server) need this to tell players what just happened.
  */
 export function finishRound(
   state: GameState,
   players: [PlayerId, PlayerId],
   random: RandomSource,
-): GameState {
+): { state: GameState; summary: RoundSummary } {
+  const [player1, player2] = players;
   const winner = getRoundWinner(state, players);
 
   const seals = { ...state.seals };
@@ -81,15 +92,28 @@ export function finishRound(
     seals[winner] = (seals[winner] || 0) + 1;
   }
 
+  const summary: RoundSummary = {
+    roundNumber: state.roundNumber,
+    winner,
+    scores: {
+      [player1]: roundScore(state, players, player1),
+      [player2]: roundScore(state, players, player2),
+    },
+    seals,
+  };
+
   const gameWinner = players.find(
     (player) => (seals[player] || 0) >= SEALS_TO_WIN_GAME,
   );
 
   if (gameWinner) {
     return {
-      ...state,
-      seals,
-      gameStatus: "game_ended",
+      state: {
+        ...state,
+        seals,
+        gameStatus: "game_ended",
+      },
+      summary,
     };
   }
 
@@ -97,10 +121,13 @@ export function finishRound(
   const nextRound = createInitialState(players, random);
 
   return {
-    ...nextRound,
-    seals,
-    roundNumber: state.roundNumber + 1,
-    turn: nextStarter,
-    gameStatus: "in_progress",
+    state: {
+      ...nextRound,
+      seals,
+      roundNumber: state.roundNumber + 1,
+      turn: nextStarter,
+      gameStatus: "in_progress",
+    },
+    summary,
   };
 }

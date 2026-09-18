@@ -18,6 +18,24 @@ export function broadcast(serverGame: ServerGame, message: ServerMessage): void 
   }
 }
 
+/** Like broadcast, but each player gets a message built relative to their own
+ * identity (e.g. "youWon" means something different per recipient). */
+function sendToEach(
+  serverGame: ServerGame,
+  build: (player: PlayerSlot, opponent: PlayerSlot) => ServerMessage,
+): void {
+  const [player1, player2] = serverGame.players;
+  if (!player1 || !player2) {
+    return;
+  }
+  if (player1.socket) {
+    send(player1.socket, build(player1, player2));
+  }
+  if (player2.socket) {
+    send(player2.socket, build(player2, player1));
+  }
+}
+
 function sendStateToEach(serverGame: ServerGame): void {
   const game = serverGame.game;
   if (!game) {
@@ -85,7 +103,6 @@ function handleConnection(
       return;
     }
 
-    const previousRoundNumber = game.getState().roundNumber;
     const result = game.executeCommand(player.playerId, parsed.command);
     serverGame.lastActivityAt = Date.now();
 
@@ -96,13 +113,28 @@ function handleConnection(
 
     sendStateToEach(serverGame);
 
+    if (result.roundSummary) {
+      const summary = result.roundSummary;
+      sendToEach(serverGame, (recipient, opponent) => ({
+        type: "ROUND_ENDED",
+        roundNumber: summary.roundNumber,
+        youWon:
+          summary.winner === undefined
+            ? undefined
+            : summary.winner === recipient.playerId,
+        yourRoundScore: summary.scores[recipient.playerId] ?? 0,
+        opponentRoundScore: summary.scores[opponent.playerId] ?? 0,
+      }));
+    }
+
     if (result.state.gameStatus === "game_ended") {
-      broadcast(serverGame, { type: "GAME_ENDED" });
-    } else if (result.state.roundNumber !== previousRoundNumber) {
-      // A round only ever transitions through "round_ended" internally -
-      // JaipurGame.executeCommand resolves it into either a fresh round or
-      // "game_ended" before returning, so this is how we detect it happened.
-      broadcast(serverGame, { type: "ROUND_ENDED" });
+      const seals = result.state.seals;
+      sendToEach(serverGame, (recipient, opponent) => ({
+        type: "GAME_ENDED",
+        youWon: (seals[recipient.playerId] ?? 0) > (seals[opponent.playerId] ?? 0),
+        yourSeals: seals[recipient.playerId] ?? 0,
+        opponentSeals: seals[opponent.playerId] ?? 0,
+      }));
     }
   });
 

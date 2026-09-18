@@ -9,3 +9,4 @@ export { createPlayerView } from "./playerView.js";
 export type { PlayerView } from "./playerView.js";
 export type { GameState } from "./state.js";
 export type { RandomSource } from "./deck.js";
+export type { RoundSummary } from "./rounds.js";

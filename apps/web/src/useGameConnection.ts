@@ -5,6 +5,19 @@ import { websocketUrl } from "./api.js";
 
 export type ConnectionStatus = "connecting" | "open" | "closed";
 
+export type RoundEndInfo = {
+  roundNumber: number;
+  youWon: boolean | undefined;
+  yourRoundScore: number;
+  opponentRoundScore: number;
+};
+
+export type GameEndInfo = {
+  youWon: boolean;
+  yourSeals: number;
+  opponentSeals: number;
+};
+
 const RECONNECT_DELAY_MS = 1500;
 
 export function useGameConnection(code: string, token: string) {
@@ -12,6 +25,8 @@ export function useGameConnection(code: string, token: string) {
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [messages, setMessages] = useState<string[]>([]);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [roundEndInfo, setRoundEndInfo] = useState<RoundEndInfo | null>(null);
+  const [gameEndInfo, setGameEndInfo] = useState<GameEndInfo | null>(null);
 
   const socketRef = useRef<WebSocket | null>(null);
   const unmountedRef = useRef(false);
@@ -52,10 +67,19 @@ export function useGameConnection(code: string, token: string) {
             logMessage("Opponent reconnected.");
             break;
           case "ROUND_ENDED":
-            logMessage("Round ended.");
+            setRoundEndInfo({
+              roundNumber: message.roundNumber,
+              youWon: message.youWon,
+              yourRoundScore: message.yourRoundScore,
+              opponentRoundScore: message.opponentRoundScore,
+            });
             break;
           case "GAME_ENDED":
-            logMessage("Game over!");
+            setGameEndInfo({
+              youWon: message.youWon,
+              yourSeals: message.yourSeals,
+              opponentSeals: message.opponentSeals,
+            });
             break;
         }
       };
@@ -85,5 +109,16 @@ export function useGameConnection(code: string, token: string) {
     socket.send(JSON.stringify({ type: "COMMAND", command }));
   }, []);
 
-  return { view, status, messages, lastError, sendCommand };
+  const dismissRoundEnd = useCallback(() => setRoundEndInfo(null), []);
+
+  return {
+    view,
+    status,
+    messages,
+    lastError,
+    roundEndInfo,
+    gameEndInfo,
+    dismissRoundEnd,
+    sendCommand,
+  };
 }
