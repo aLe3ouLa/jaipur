@@ -6,7 +6,10 @@ import { createInitialState } from "./setup";
 const CAMEL_MAJORITY_BONUS = 5;
 const SEALS_TO_WIN_GAME = 2;
 
-function otherPlayer(players: [PlayerId, PlayerId], player: PlayerId): PlayerId {
+export function otherPlayer(
+  players: [PlayerId, PlayerId],
+  player: PlayerId,
+): PlayerId {
   return players[0] === player ? players[1] : players[0];
 }
 
@@ -78,7 +81,9 @@ export function finishRound(
     seals[winner] = (seals[winner] || 0) + 1;
   }
 
-  const gameWinner = players.find((player) => (seals[player] || 0) >= SEALS_TO_WIN_GAME);
+  const gameWinner = players.find(
+    (player) => (seals[player] || 0) >= SEALS_TO_WIN_GAME,
+  );
 
   if (gameWinner) {
     return {
