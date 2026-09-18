@@ -1,5 +1,7 @@
 type Guid<DataType> = string & { __guid: DataType };
 
+export type SaleSize = 3 | 4 | 5;
+
 export type GoodsType =
   | "leather"
   | "spices"
