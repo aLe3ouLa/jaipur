@@ -118,32 +118,19 @@ export function GamePage({ code, token }: { code: string; token: string }) {
                 mode === "exchange" &&
                 takeSelection.some((c) => c.id === card.id)
               }
-              disabled={
-                mode === "none"
-                  ? !isMyTurn || card.type === "camel"
-                  : mode === "sell"
-              }
+              disabled={mode === "none" ? !isMyTurn : mode === "sell"}
               onClick={
                 mode === "exchange"
                   ? () => toggleTake(card)
-                  : mode === "none" && isMyTurn && card.type !== "camel"
-                    ? () => sendCommand({ type: "TAKE_GOODS", cardId: card.id })
+                  : mode === "none" && isMyTurn
+                    ? card.type === "camel"
+                      ? () => sendCommand({ type: "TAKE_CAMELS" })
+                      : () => sendCommand({ type: "TAKE_GOODS", cardId: card.id })
                     : undefined
               }
             />
           ))}
         </div>
-        {mode === "none" && (
-          <button
-            type="button"
-            disabled={
-              !isMyTurn || !view.market.some((c) => c.type === "camel")
-            }
-            onClick={() => sendCommand({ type: "TAKE_CAMELS" })}
-          >
-            Take Camels
-          </button>
-        )}
       </section>
 
       <section className="hand-area">
@@ -243,12 +230,7 @@ export function GamePage({ code, token }: { code: string; token: string }) {
       </section>
 
       <section className="discard-area">
-        <h3>Discard ({view.discardPile.length})</h3>
-        <div className="row">
-          {view.discardPile.map((card) => (
-            <Card key={card.id} card={card} disabled />
-          ))}
-        </div>
+        <h3>Discarded ({view.discardPile.length})</h3>
       </section>
     </div>
   );

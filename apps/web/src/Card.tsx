@@ -18,12 +18,12 @@ export function Card({
     <button
       type="button"
       className={`card${selected ? " card--selected" : ""}`}
-      style={{ backgroundColor: asset.color }}
       disabled={disabled || !onClick}
       onClick={onClick}
       aria-pressed={selected}
+      aria-label={asset.label}
     >
-      {asset.label}
+      <img src={asset.image} alt={asset.label} draggable={false} />
     </button>
   );
 }
@@ -31,7 +31,8 @@ export function Card({
 export function CardBack({ count }: { count: number }) {
   return (
     <div className="card card--back" aria-label={`${count} hidden cards`}>
-      {count}
+      <img src={assets.cardBack} alt="" draggable={false} />
+      <span className="card--back__count">{count}</span>
     </div>
   );
 }

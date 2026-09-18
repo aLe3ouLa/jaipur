@@ -1,16 +1,23 @@
-// Placeholder visual registry. Nothing in the components below references a
-// color/label literal directly - swap the values here once real artwork
-// exists, without touching any component.
 import type { CardType } from "shared";
+
+import camel from "./assets/cards/camel.png";
+import leather from "./assets/cards/leather.png";
+import spices from "./assets/cards/spice.png";
+import cloth from "./assets/cards/cloth.png";
+import silver from "./assets/cards/silver.png";
+import gold from "./assets/cards/gold.png";
+import diamonds from "./assets/cards/diamonds.png";
+import cardBack from "./assets/cards/back.png";
 
 export const assets = {
   cards: {
-    camel: { label: "Camel", color: "#d8c39a" },
-    leather: { label: "Leather", color: "#8b5e3c" },
-    spices: { label: "Spices", color: "#c1440e" },
-    cloth: { label: "Cloth", color: "#7b68ee" },
-    silver: { label: "Silver", color: "#b7bcc0" },
-    gold: { label: "Gold", color: "#d4af37" },
-    diamonds: { label: "Diamonds", color: "#6fd9e8" },
-  } satisfies Record<CardType, { label: string; color: string }>,
+    camel: { label: "Camel", image: camel },
+    leather: { label: "Leather", image: leather },
+    spices: { label: "Spices", image: spices },
+    cloth: { label: "Cloth", image: cloth },
+    silver: { label: "Silver", image: silver },
+    gold: { label: "Gold", image: gold },
+    diamonds: { label: "Diamonds", image: diamonds },
+  } satisfies Record<CardType, { label: string; image: string }>,
+  cardBack,
 };
