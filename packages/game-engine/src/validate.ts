@@ -98,6 +98,25 @@ export function validateCommand(
           reason: "You have to exchange equal amount of cards",
         };
       }
+
+      const goodsGivenFromHand = command.handCardIds.filter((cardId) =>
+        hand.some((c) => c.id === cardId),
+      ).length;
+
+      const goodsReceivedFromMarket = command.marketCardIds.filter(
+        (cardId) => market.find((c) => c.id === cardId)?.type !== "camel",
+      ).length;
+
+      const resultingHandSize =
+        hand.length - goodsGivenFromHand + goodsReceivedFromMarket;
+
+      if (resultingHandSize > 7) {
+        return {
+          legal: false,
+          reason: "This exchange would leave you with more than 7 cards",
+        };
+      }
+
       return { legal: true };
     }
     case "SELL_GOODS": {
