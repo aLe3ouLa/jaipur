@@ -99,5 +99,8 @@ export function createInitialState(
     turn: player1,
     roundNumber: 1,
     gameStatus: "waiting_for_players",
+    seals: { [player1]: 0, [player2]: 0 },
+    bonusTokensWon: { [player1]: 0, [player2]: 0 },
+    goodsTokensWon: { [player1]: 0, [player2]: 0 },
   };
 }

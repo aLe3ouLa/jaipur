@@ -26,8 +26,11 @@ export function applySellGoods(
   const remainingStack = state.goodsTokens[goodsType];
   const tokensAwarded = remainingStack.slice(0, quantity);
   const newStack = remainingStack.slice(quantity);
+  let goodsTokensWon = state.goodsTokensWon[playerId] || 0;
+  let bonusTokensWon = state.bonusTokensWon[playerId] || 0;
 
   score += tokensAwarded.reduce((acc, curr) => acc + curr, 0);
+  goodsTokensWon += tokensAwarded.length;
 
   let tier: SaleSize | undefined = undefined;
   if (quantity === 3) {
@@ -45,6 +48,7 @@ export function applySellGoods(
     const newBonusStack = bonusStack.slice(1);
 
     score += bonusAwarded.reduce((acc, curr) => acc + curr, 0);
+    bonusTokensWon += 1;
     bonusTokens = { ...state.bonusTokens, [tier]: newBonusStack };
   }
 
@@ -54,8 +58,7 @@ export function applySellGoods(
     (stack) => stack.length === 0,
   ).length;
 
-  const gameStatus =
-    depletedStacks >= 3 ? "round_ended" : state.gameStatus;
+  const gameStatus = depletedStacks >= 3 ? "round_ended" : state.gameStatus;
 
   return {
     ...state,
@@ -65,5 +68,7 @@ export function applySellGoods(
     goodsTokens,
     bonusTokens,
     gameStatus,
+    goodsTokensWon: { ...state.goodsTokensWon, [playerId]: goodsTokensWon },
+    bonusTokensWon: { ...state.bonusTokensWon, [playerId]: bonusTokensWon },
   };
 }

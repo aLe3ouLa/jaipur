@@ -16,4 +16,7 @@ export type GameState = {
     | "in_progress"
     | "round_ended"
     | "game_ended";
+  seals: Record<PlayerId, number>;
+  goodsTokensWon: Record<PlayerId, number>;
+  bonusTokensWon: Record<PlayerId, number>;
 };
