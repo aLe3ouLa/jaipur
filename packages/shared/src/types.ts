@@ -13,3 +13,8 @@ export type CardType = GoodsType | "camel";
 
 export type PlayerId = Guid<"player">;
 export type CardId = Guid<"card">;
+
+export type Card = {
+  id: CardId;
+  type: CardType;
+};

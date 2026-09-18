@@ -1,11 +1,11 @@
-import { CardId, GoodsType, PlayerId, SaleSize } from "shared";
+import { Card, GoodsType, PlayerId, SaleSize } from "shared";
 
 export type GameState = {
-  hand: Record<PlayerId, CardId[]>;
+  hand: Record<PlayerId, Card[]>;
   camelHerd: Record<PlayerId, number>;
-  market: CardId[];
-  deck: CardId[];
-  discardPile: CardId[];
+  market: Card[];
+  deck: Card[];
+  discardPile: Card[];
   goodsTokens: Record<GoodsType, number>;
   bonusTokens: Record<SaleSize, number>;
   score: Record<PlayerId, number>;
