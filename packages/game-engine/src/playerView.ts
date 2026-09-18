@@ -1,7 +1,7 @@
 import { Card, GoodsType, PlayerId, SaleSize } from "shared";
 import { GameState } from "./state";
 
-type PlayerView = {
+export type PlayerView = {
   myHand: Card[];
   opponentHandCount: number;
   myCamelHerd: Card[];

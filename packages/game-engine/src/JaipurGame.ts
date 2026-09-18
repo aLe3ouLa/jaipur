@@ -21,7 +21,11 @@ export class JaipurGame {
   constructor(players: [PlayerId, PlayerId], random: RandomSource) {
     this.players = players;
     this.random = random;
-    this.state = createInitialState(players, random);
+    // Both PlayerIds are already known by the time a JaipurGame can be
+    // constructed, so "waiting_for_players" (createInitialState's default,
+    // correct for a server that hasn't matched a second player yet) never
+    // actually applies here - the game is ready to play immediately.
+    this.state = { ...createInitialState(players, random), gameStatus: "in_progress" };
   }
 
   getState(): GameState {
